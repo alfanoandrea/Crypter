@@ -1,5 +1,8 @@
 import os
 import time
+import urllib
+import urllib.request
+import urllib.error
 
 try:
     from tqdm import tqdm
@@ -7,6 +10,12 @@ except ImportError:
     import subprocess
     subprocess.run(["pip", "install", "tqdm"])
     from tqdm import tqdm
+
+
+debug = True
+version = "2.1"
+versionURL = "https://github.com/alfanoandrea/Crypter/raw/main/version.txt"
+repository = "https://github.com/alfanoandrea/Crypter"
 
 
 class Color:
@@ -25,6 +34,46 @@ def cls():
     os.system("cls") if os.name == 'nt' else os.system("clear")
 
 
+def internet():
+    try:
+        urllib.request.urlopen('https://www.google.com', timeout=5)
+        return True
+    except urllib.error.URLError:
+        return False
+
+
+def update():
+    intro(dynamic = False)
+    def checkVersion():
+        try:
+            with urllib.request.urlopen(versionURL, timeout=5) as f:
+                latestVersion = f.read().decode('utf-8').strip()    
+            if version != latestVersion:
+                print(f"{Color.yellow} A new version {Color.green}({latestVersion}){Color.yellow} is available. {Color.gray}Updating...{Color.reset}\n")
+                performUpdate()
+            else:
+                print(f"{Color.gray} The script is already up to date!{Color.reset}")
+        except urllib.error.URLError as e:
+            print(f"{Color.red} Error checking version!{Color.reset}")
+        except Exception as e:
+            print(f"{Color.red} Error during version check!{Color.reset}")
+
+    def performUpdate():
+        try:
+            subprocess.run(["git", "reset", "--hard", "HEAD"])
+            subprocess.run(["git", "pull", "origin", "main"])
+            print(f"{Color.green} Update completed! Please run the script again.{Color.reset}")
+            exit()
+        except Exception as e:
+            print(f"{Color.red} Error updating the script!{Color.reset}")
+
+    if internet():
+        checkVersion()
+    else:
+        print(f"{Color.red} No internet connection!{Color.reset}")
+    input('\n')
+
+
 def intro(dynamic):
     cls()
     logo = [
@@ -34,7 +83,7 @@ def intro(dynamic):
         "  / ___/ ___/ / / / __ \/ __/ _ \/ ___/ \n",
         " / /__/ /  / /_/ / /_/ / /_/  __/ /     \n",
         " \___/_/   \__, / .___/\__/\___/_/      \n",
-        f"          /____/_/ {Color.fucsia}{Color.italic}   by alfanowski {Color.reset} \n"
+        f"   {Color.fucsia}{Color.italic}{version}{Color.green}    /____/_/ {Color.fucsia}{Color.italic}   by alfanowski {Color.reset} \n"
         f"{Color.red} ------------------------------------- \n{Color.reset}\n"
     ]
     for i in logo:
@@ -47,7 +96,8 @@ def intro(dynamic):
 
 def selezione():
     intro(False)
-    print(f"  {Color.gray}({Color.green}X{Color.gray}){Color.yellow} Exit")
+    print(f"  {Color.gray}({Color.green}X{Color.gray}){Color.yellow} Exit", end=' ')
+    print(f"\t  {Color.gray}({Color.green}U{Color.gray}){Color.yellow} Update\n")
     print(f"  {Color.gray}({Color.green}1{Color.gray}){Color.cyan} Encrypt File")
     print(f"  {Color.gray}({Color.green}2{Color.gray}){Color.cyan} Decrypt File \n")
     sel = input(f"{Color.fucsia}   >> {Color.reset}").lower()
@@ -109,11 +159,16 @@ def crypt(nomeFile, type):
 
 
 def main():
-    intro(True)
+    with open("version.txt", 'w') as f:
+        f.write(version)
+    f.close()
+    intro(True) if not debug else intro(False)
     while True:
         sel = selezione()
         if sel == 'x':
             break
+        elif sel == 'u':
+            update()
         elif sel in ['1','2']:
             while True:
                 controllo = process(int(sel))
