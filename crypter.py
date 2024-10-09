@@ -3,11 +3,10 @@ import time
 import urllib
 import urllib.request
 import urllib.error
-
+import subprocess
 try:
     from tqdm import tqdm
 except ImportError:
-    import subprocess
     subprocess.run(["pip", "install", "tqdm"])
     from tqdm import tqdm
 
