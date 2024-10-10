@@ -11,8 +11,8 @@ except ImportError:
     from tqdm import tqdm
 
 
-debug = True
-version = "2.1"
+debug = False
+version = "2.2"
 versionURL = "https://github.com/alfanoandrea/Crypter/raw/main/version.txt"
 repository = "https://github.com/alfanoandrea/Crypter"
 
